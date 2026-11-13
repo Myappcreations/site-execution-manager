@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10151f">
+  <title>Site Execution Manager V1</title>
+  <style>
+    :root{
+      color-scheme:dark;--bg:#0b1018;--panel:#141c28;--panel2:#192434;
+      --line:#273447;--text:#edf3fb;--muted:#91a0b5;--blue:#4d9cff;
+      --cyan:#54d5e8;--green:#35c98a;--amber:#f2b84b;--red:#ff7078;
+      --radius:18px;--shadow:0 14px 34px rgba(0,0,0,.22)
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(900px 420px at 85% -10%,#18304a 0%,transparent 60%),var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{width:min(1120px,100%);margin:auto;padding:22px 18px 48px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#2878d7,#42c5d8);font-weight:900;color:white;box-shadow:0 8px 24px #2878d744}
+    .brand h1{font-size:16px;line-height:1.2;margin:0;letter-spacing:.04em}
+    .brand p{font-size:11px;color:var(--muted);margin:4px 0 0;letter-spacing:.12em;text-transform:uppercase}
+    .status{display:flex;align-items:center;gap:8px;border:1px solid #245b48;background:#10291f;color:#75e2b4;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+    .hero{background:linear-gradient(120deg,#17283d,#17212e 62%,#1b2939);border:1px solid #2a3d54;border-radius:24px;padding:25px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .hero:after{content:"";position:absolute;width:240px;height:240px;border:1px solid #3d5d7b55;border-radius:50%;right:-75px;top:-110px;box-shadow:0 0 0 28px #3d5d7b12,0 0 0 58px #3d5d7b0a}
+    .eyebrow{color:#8ebdf0;font-size:11px;text-transform:uppercase;letter-spacing:.16em;font-weight:800}
+    .hero h2{font-size:clamp(24px,4vw,34px);line-height:1.15;margin:9px 0 7px;max-width:700px}
+    .hero .sub{color:#aebdd0;margin:0}
+    .hero-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:22px;flex-wrap:wrap}
+    .project-meta{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{border:1px solid #40536a;background:#111d2b88;color:#d3dfed;border-radius:999px;padding:6px 10px;font-size:12px}
+    button{font:inherit;cursor:pointer}
+    .refresh{border:1px solid #477db8;background:#1b4f83;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700}
+    .refresh:disabled{opacity:.6;cursor:wait}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:27px 2px 13px}
+    .section-head h3{font-size:16px;margin:0}
+    .section-head span{font-size:12px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+    .metric,.panel{background:linear-gradient(180deg,#17212e,#121a25);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .metric{padding:17px;min-height:126px}
+    .metric-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}
+    .metric-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:#22354a;color:#8ec3ff;font-size:15px}
+    .metric strong{display:block;font-size:30px;line-height:1.15;margin-top:15px;letter-spacing:-.04em}
+    .metric small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+    .two-col{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+    .panel{padding:18px}
+    .panel h3{font-size:15px;margin:0 0 14px}
+    .progress-line{height:9px;background:#263346;border-radius:20px;overflow:hidden;margin:10px 0 8px}
+    .progress-line span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:20px}
+    .progress-caption{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+    .stat-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #263244;font-size:13px}
+    .stat-row:last-child{border:0}
+    .stat-row span{color:var(--muted)}
+    .list{display:grid;gap:9px}
+    .list-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#101824;border:1px solid #263244;border-radius:12px;padding:11px 12px}
+    .list-item strong{font-size:13px;display:block}
+    .list-item small{font-size:11px;color:var(--muted)}
+    .tag{font-size:10px;font-weight:800;padding:4px 8px;border-radius:999px;background:#153a30;color:#6fe0b0}
+    .tag.inactive{background:#3a2c19;color:#f3c36d}
+    .empty{padding:18px;border:1px dashed #35465d;border-radius:12px;color:var(--muted);font-size:13px;text-align:center}
+    .quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .quick{padding:16px;background:#151f2c;border:1px solid var(--line);border-radius:15px}
+    .quick .ico{font-size:20px;margin-bottom:8px}
+    .quick strong{display:block;font-size:13px}
+    .quick small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    footer{color:#65758b;font-size:11px;text-align:center;margin-top:28px}
+    .error{display:none;margin:14px 0;padding:12px 14px;background:#351c25;border:1px solid #733342;border-radius:12px;color:#ffb4bb;font-size:13px}
+    .loading{color:var(--muted);font-size:13px}
+
+    .progress-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+    .field{display:grid;gap:6px;color:#aebdd0;font-size:12px;font-weight:650}
+    .field input,.field select,.field textarea{width:100%;min-width:0;background:#0e1621;border:1px solid #304057;border-radius:11px;padding:12px;color:var(--text);font:inherit;font-size:14px;outline:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #4d9cff22}
+    .field input[readonly]{color:#91a0b5;background:#121c29}
+    .field select:disabled{opacity:.6}
+    .manpower-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .manpower-total{display:flex;justify-content:space-between;align-items:center;background:#10271f;border:1px solid #245b48;border-radius:12px;padding:12px 14px;margin-top:14px;color:#9adbbd;font-size:13px}
+    .manpower-total strong{font-size:20px;color:#75e2b4}
+    .remarks-field{margin-top:15px}
+    .form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+    .form-actions button{flex:1;min-width:170px}
+    .form-actions button:disabled{opacity:.45;cursor:not-allowed}
+    .submit-preview{border:1px solid #356db0;background:#214d7c;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700}
+    .form-note{font-size:11px;color:#91a0b5;margin:12px 0 0}
+
+    @media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
+    @media(max-width:480px){.wrap{padding:16px 13px 36px}.hero{padding:20px}.grid{gap:9px}.metric{padding:13px;min-height:116px}.metric strong{font-size:26px}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.status{font-size:0;padding:9px}.status .dot{width:8px;height:8px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">SE</div>
+        <div><h1>SITE EXECUTION MANAGER</h1><p>Project control · V1</p></div>
+      </div>
+      <div class="status"><span class="dot"></span><span id="connectionText">Connecting</span></div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Active project · PRJ001</div>
+      <h2 id="projectName">Sitharampur Admin Building</h2>
+      <p class="sub" id="clientLocation">Grapid Engineering Pvt. Ltd. · Sitharampur</p>
+      <div class="hero-bottom">
+        <div class="project-meta">
+          <span class="chip" id="projectStatus">Loading status…</span>
+          <span class="chip">Construction + Interiors</span>
+        </div>
+        <button class="refresh" id="refreshBtn" type="button" onclick="loadDashboard()">↻ Refresh data</button>
+      </div>
+    </section>
+
+    <div id="errorBox" class="error" role="alert"></div>
+
+    <div class="section-head"><h3>Project overview</h3><span id="updatedAt">Loading live data…</span></div>
+    <section class="grid">
+      <article class="metric"><div class="metric-top"><span>Rooms / Areas</span><span class="metric-icon">⌂</span></div><strong id="totalRooms">—</strong><small>Registered project spaces</small></article>
+      <article class="metric"><div class="metric-top"><span>Activities</span><span class="metric-icon">▤</span></div><strong id="totalActivities">—</strong><small>Assigned project activities</small></article>
+      <article class="metric"><div class="metric-top"><span>Active teams</span><span class="metric-icon">♧</span></div><strong id="activeTeams">—</strong><small id="teamSub">Contractor / site teams</small></article>
+      <article class="metric"><div class="metric-top"><span>Today's execution</span><span class="metric-icon">↗</span></div><strong id="todayExecuted">—</strong><small>Quantity entered today</small></article>
+    </section>
+
+    <div class="section-head"><h3>Execution snapshot</h3><span>Based on saved daily entries</span></div>
+    <section class="two-col">
+      <article class="panel">
+        <h3>Activity completion</h3>
+        <div class="progress-caption"><span>Completed activities</span><strong id="completionLabel">—</strong></div>
+        <div class="progress-line"><span id="completionBar"></span></div>
+        <div class="stat-row"><span>Total activities</span><strong id="activityTotal">—</strong></div>
+        <div class="stat-row"><span>Completed</span><strong id="activityCompleted">—</strong></div>
+        <div class="stat-row"><span>Pending / other status</span><strong id="activityPending">—</strong></div>
+      </article>
+      <article class="panel">
+        <h3>Site summary</h3>
+        <div class="stat-row"><span>Total executed quantity</span><strong id="totalExecuted">—</strong></div>
+        <div class="stat-row"><span>Today's executed quantity</span><strong id="todayExecutedSummary">—</strong></div>
+        <div class="stat-row"><span>Registered teams</span><strong id="totalTeams">—</strong></div>
+        <div class="stat-row"><span>Project status</span><strong id="projectStatusSummary">—</strong></div>
+      </article>
+    </section>
+
+    <div class="section-head"><h3>Rooms & areas</h3><span id="roomCountLabel">From project database</span></div>
+    <section class="panel"><div id="roomsList" class="list"><div class="loading">Loading rooms…</div></div></section>
+
+    <div class="section-head"><h3>Contractor teams</h3><span>Project team directory</span></div>
+    <section class="panel"><div id="teamsList" class="list"><div class="loading">Loading teams…</div></div></section>
+
+
+    <div class="section-head"><h3>Daily Progress entry</h3><span>Live form · connected to Google Sheets</span></div>
+    <section class="panel" id="progressEntryPanel" style="padding:10px;overflow:hidden">
+      <iframe
+        src="https://script.google.com/macros/s/AKfycby_5_cXRXhDLd74l2cNpdlajtEsFdJqWdz_394-pL4dLehHGVSB_GNfpZckHw9hci1K5g/exec?action=progressForm"
+        title="Daily Progress Entry Form"
+        loading="lazy"
+        style="display:block;width:100%;height:980px;border:0;border-radius:12px;background:#111827"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="clipboard-read; clipboard-write">
+      </iframe>
+    </section>
+
+    <div class="section-head"><h3>Management modules</h3><span>V1 workspace</span></div>
+    <section class="quick-grid">
+      <div class="quick"><div class="ico">▦</div><strong>Daily Progress</strong><small>Daily work records</small></div>
+      <div class="quick"><div class="ico">⌂</div><strong>Rooms & Areas</strong><small>Project spaces</small></div>
+      <div class="quick"><div class="ico">☷</div><strong>Activities</strong><small>Scope and status</small></div>
+      <div class="quick"><div class="ico">♧</div><strong>Teams</strong><small>Contractor directory</small></div>
+      <div class="quick"><div class="ico">⌖</div><strong>Measurements</strong><small>BOQ quantity references</small></div>
+      <div class="quick"><div class="ico">▤</div><strong>Daily Reports</strong><small>Site summaries</small></div>
+    </section>
+
+    <footer>Site Execution Manager V1 · Sitharampur Admin Building</footer>
+  </main>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycby_5_cXRXhDLd74l2cNpdlajtEsFdJqWdz_394-pL4dLehHGVSB_GNfpZckHw9hci1K5g/exec';
+
+    function loadDashboard() {
+      const button = document.getElementById('refreshBtn');
+      const errorBox = document.getElementById('errorBox');
+      button.disabled = true;
+      button.textContent = 'Loading…';
+      errorBox.style.display = 'none';
+      document.getElementById('connectionText').textContent = 'Connecting';
+
+      const callbackName = 'dashboardCallback_' + Date.now();
+      const script = document.createElement('script');
+      const timeout = setTimeout(() => {
+        cleanup();
+        showError('The dashboard request timed out. Check the Apps Script deployment and try Refresh data.');
+      }, 20000);
+
+      function cleanup() {
+        clearTimeout(timeout);
+        if (script.parentNode) script.parentNode.removeChild(script);
+        try { delete window[callbackName]; } catch (_) {}
+        button.disabled = false;
+        button.textContent = '↻ Refresh data';
+      }
+
+      window[callbackName] = function(data) {
+        cleanup();
+        if (!data || !data.success) {
+          showError((data && data.error) || 'The server returned an unexpected response.');
+          return;
+        }
+        renderDashboard(data);
+      };
+
+      script.onerror = function() {
+        cleanup();
+        showError('Could not reach the dashboard API. Verify the Web App URL and deployment access.');
+      };
+
+      script.src = API_URL + '?action=dashboard&callback=' + callbackName + '&_=' + Date.now();
+      document.body.appendChild(script);
+    }
+
+    function showError(message) {
+      document.getElementById('connectionText').textContent = 'Connection issue';
+      const box = document.getElementById('errorBox');
+      box.textContent = message;
+      box.style.display = 'block';
+    }
+
+    function safeText(value, fallback='—') {
+      return value === null || value === undefined || value === '' ? fallback : String(value);
+    }
+
+    function renderDashboard(data) {
+      const p = data.project || {};
+      const s = data.summary || {};
+      document.getElementById('connectionText').textContent = 'Live connection';
+      document.getElementById('projectName').textContent = safeText(p.name, 'Sitharampur Admin Building');
+      document.getElementById('clientLocation').textContent = [p.client, p.location].filter(Boolean).join(' · ');
+      document.getElementById('projectStatus').textContent = safeText(p.status, 'Active');
+      document.getElementById('projectStatusSummary').textContent = safeText(p.status);
+      document.getElementById('totalRooms').textContent = safeText(s.totalRooms, '0');
+      document.getElementById('totalActivities').textContent = safeText(s.totalActivities, '0');
+      document.getElementById('activeTeams').textContent = safeText(s.activeTeams, '0');
+      document.getElementById('teamSub').textContent = safeText(s.totalTeams, '0') + ' registered teams';
+      document.getElementById('todayExecuted').textContent = safeText(s.todayExecutedQuantity, '0');
+      document.getElementById('todayExecutedSummary').textContent = safeText(s.todayExecutedQuantity, '0');
+      document.getElementById('totalExecuted').textContent = safeText(s.totalExecutedQuantity, '0');
+      document.getElementById('activityTotal').textContent = safeText(s.totalActivities, '0');
+      document.getElementById('activityCompleted').textContent = safeText(s.completedActivities, '0');
+      document.getElementById('activityPending').textContent = safeText(s.pendingActivities, '0');
+      document.getElementById('totalTeams').textContent = safeText(s.totalTeams, '0');
+
+      const total = Number(s.totalActivities || 0);
+      const completed = Number(s.completedActivities || 0);
+      const percent = total > 0 ? Math.min(100, Math.round(completed / total * 100)) : 0;
+      document.getElementById('completionLabel').textContent = percent + '%';
+      document.getElementById('completionBar').style.width = percent + '%';
+      document.getElementById('updatedAt').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+      const rooms = Array.isArray(data.rooms) ? data.rooms : [];
+      document.getElementById('roomCountLabel').textContent = rooms.length + ' registered spaces';
+      document.getElementById('roomsList').innerHTML = rooms.length ? rooms.map(r =>
+        '<div class="list-item"><div><strong>' + escapeHtml(safeText(r.name, r.id)) +
+        '</strong><small>' + escapeHtml([r.floor, r.category].filter(Boolean).join(' · ') || r.id || '') +
+        '</small></div><span class="tag">Registered</span></div>'
+      ).join('') : '<div class="empty">No room records found for this project.</div>';
+
+      const teams = Array.isArray(data.teams) ? data.teams : [];
+      document.getElementById('teamsList').innerHTML = teams.length ? teams.map(t => {
+        const active = String(t.active).toLowerCase() === 'yes';
+        return '<div class="list-item"><div><strong>' + escapeHtml(safeText(t.name, t.id)) +
+          '</strong><small>' + escapeHtml(t.id || '') + '</small></div><span class="tag ' +
+          (active ? '' : 'inactive') + '">' + (active ? 'Active' : 'Inactive') + '</span></div>';
+      }).join('') : '<div class="empty">No contractor teams found for this project.</div>';
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      })[ch]);
+    }
+
+
+        loadDashboard();
+  </script>
+</body>
+</html>
